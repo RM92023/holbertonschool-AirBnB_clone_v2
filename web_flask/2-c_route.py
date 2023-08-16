@@ -30,7 +30,7 @@ def hbnb():
 def c_text(text):
     '''Display "C" followed by the value of <text>'''
     '''Replace _ with "" in variables'''
-    formatText = text.replace('_', '')
+    formatText = text.replace('_', ' ')
     return "C {}".format(formatText)
 
 
