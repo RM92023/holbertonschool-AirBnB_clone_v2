@@ -1,16 +1,14 @@
 #!/usr/bin/python3
-"""Inicialization of the Python Flask application"""
+"""Initialization of the Python Flask application"""
 from flask import Flask
 
 app = Flask(__name__)
-
 
 '''Route root URL'''
 
 
 @app.route('/', strict_slashes=False)
 def hello_hbnb():
-    '''Display hello World'''
     return "Hello HBNB!"
 
 
@@ -19,33 +17,27 @@ def hello_hbnb():
 
 @app.route('/hbnb', strict_slashes=False)
 def hbnb():
-    '''Display hello HBNB!'''
     return "HBNB"
 
 
-'''Route for /hbnb'''
+'''Route for /c/<text>'''
 
 
 @app.route('/c/<text>', strict_slashes=False)
 def c_text(text):
-    '''Display "C" followed by the value of <text>'''
-    '''Replace _ with "" in variables'''
-    formatText = text.replace('_', ' ')
-    return "C {}".format(formatText)
+    text = text.replace('_', ' ')
+    return f"C {text}"
 
 
 '''Route for /python/<text> with default value "is cool"'''
 
 
-@app.route('/python/', default={'text': 'is cool'}, strict_slashes=False)
+@app.route('/python/', defaults={'text': 'is cool'}, strict_slashes=False)
 @app.route('/python/<text>', strict_slashes=False)
 def python_text(text):
-    '''Display "python" followed by the value of <text>'''
-    '''Replace _ with " " in variables'''
-    formatText = text.replace('_', ' ')
-    return "Python {}".format(formatText)
+    text = text.replace('_', ' ')
+    return f"Python {text}"
 
 
 if __name__ == '__main__':
-    # start Flask server
-    app.run(debug=True, port=5000, host="0.0.0.0")
+    app.run(host='0.0.0.0', port=5000)
