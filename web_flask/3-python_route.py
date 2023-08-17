@@ -34,7 +34,7 @@ def c_text(text):
     return "C {}".format(formatText)
 
 
-'''Route for c/hbnb'''
+'''Route for python/hbnb'''
 
 
 @app.route('/python/', default={'text': 'is cool'}, strict_slashes=False)
@@ -43,7 +43,7 @@ def python_text(text):
     '''Display "python" followed by the value of <text>'''
     '''Replace _ with " " in variables'''
     formatText = text.replace('_', ' ')
-    return "C {}".format(formatText)
+    return "Python {}".format(formatText)
 
 
 if __name__ == '__main__':
