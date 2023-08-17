@@ -34,7 +34,7 @@ def c_text(text):
     return "C {}".format(formatText)
 
 
-'''Route for python/hbnb'''
+'''Route for /python/<text> with default value "is cool"'''
 
 
 @app.route('/python/', default={'text': 'is cool'}, strict_slashes=False)
