@@ -1,51 +1,28 @@
-#!/usr/bin/python3
 """ Place Module for HBNB project """
 from models.base_model import BaseModel, Base
-from models.amenity import Amenity
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
+import models
+from sqlalchemy import *
+from sqlalchemy import Column, String, Integer, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
 from os import getenv
+import shlex
 
-table_associacion = Table("place_amenity", Base.metadata,
-                          Column(
-                              "place_id",
-                              String(60),
-                              ForeignKey("places.id"),
-                              primary_key=True,
-                              nullable=False),
-                          Column(
-                              "amenity_id",
-                              String(60),
-                              ForeignKey("amenities.id"),
-                              primary_key=True,
-                              nullable=False))
+
+place_amenity = Table("place_amenity", Base.metadata,
+                      Column("place_id", String(60),
+                             ForeignKey("places.id"),
+                             primary_key=True,
+                             nullable=False),
+                      Column("amenity_id", String(60),
+                             ForeignKey("amenities.id"),
+                             primary_key=True,
+                             nullable=False))
 
 
 class Place(BaseModel, Base):
-    """Represents a Place for a MySQL database.
-
-    Inherits from SQLAlchemy Base and links to the MySQL table places.
-
-    Attributes:
-        __tablename__ (str): The name of the MySQL table to store places.
-        city_id (sqlalchemy String): The place's city id.
-        user_id (sqlalchemy String): The place's user id.
-        name (sqlalchemy String): The name.
-        description (sqlalchemy String): The description.
-        number_rooms (sqlalchemy Integer): The number of rooms.
-        number_bathrooms (sqlalchemy Integer): The number of bathrooms.
-        max_guest (sqlalchemy Integer): The maximum number of guests.
-        price_by_night (sqlalchemy Integer): The price by night.
-        latitude (sqlalchemy Float): The place's latitude.
-        longitude (sqlalchemy Float): The place's longitude.
-        reviews (sqlalchemy relationship): The Place-Review relationship.
-        amenities (sqlalchemy relationship): The Place-Amenity relationship.
-        amenity_ids (list): An id list of all linked amenities.
+    """This is the class for Place
     """
-
-    storage = getenv("HBNB_TYPE_STORAGE")
-
-    __tablename__ = 'places'
+    __tablename__ = "places"
     city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
     user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
     name = Column(String(128), nullable=False)
@@ -58,44 +35,38 @@ class Place(BaseModel, Base):
     longitude = Column(Float)
     amenity_ids = []
 
-    if storage == "db":
-        reviews = relationship("Review", backref="place", cascade="delete")
-        amenities = relationship("Amenity", secondary="place_amenity",
-                                 viewonly=False, overlaps="place_amenities")
+    if getenv("HBNB_TYPE_STORAGE") == "db":
+        reviews = relationship("Review", cascade='all, delete, delete-orphan',
+                               backref="place")
 
-    if storage == "fs":
-
+        amenities = relationship("Amenity", secondary=place_amenity,
+                                 viewonly=False,
+                                 back_populates="place_amenities")
+    else:
         @property
         def reviews(self):
-            """
-            This method returns a list of Review objects
-            associated with the current Place object
-            """
-            from models import storage
-            review_list = []
-            for review in list(storage.all().values()):
-                if review.place_id == self.id:
-                    review_list.append(review)
-            return review_list
+            """ Returns list of reviews.id """
+            var = models.storage.all()
+            lista = []
+            result = []
+            for key in var:
+                review = key.replace('.', ' ')
+                review = shlex.split(review)
+                if (review[0] == 'Review'):
+                    lista.append(var[key])
+            for elem in lista:
+                if (elem.place_id == self.id):
+                    result.append(elem)
+            return (result)
 
         @property
         def amenities(self):
-            """
-            This method returns a list of Amenity objects
-            associated with the current Place object
-            """
-            from models import storage
-            amenity_list = []
-            for amenity in list(storage.all(Amenity).values()):
-                if amenity.id in self.amenity_ids:
-                    amenity_list.append(amenity)
-            return amenity_list
+            """ Returns list of amenity ids """
+            return self.amenity_ids
 
         @amenities.setter
-        def amenities(self, object):
-            """
-            This method sets the value of the amenities attribute
-            of the current Place object to the given object
-            """
-            if isinstance(object, Amenity):
-                self.amenity_ids.append(object.id)
+        def amenities(self, obj=None):
+            """ Appends amenity ids to the attribute """
+            from models.amenity import Amenity
+            if type(obj) is Amenity and obj.id not in self.amenity_ids:
+                self.amenity_ids.append(obj.id)
