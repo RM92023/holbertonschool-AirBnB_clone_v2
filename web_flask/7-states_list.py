@@ -23,7 +23,7 @@ def teardown(self):
 @app.route('/states_list', strict_slashes=False)
 def states_list():
     '''Display an HTML page with a list of all states'''
-    states = render_template(storage.all(State).values(), key=lambda s: s.name)
+    states = storage.all(State)
     return render_template('7-states_list.html', states=states)
 
 
